@@ -67,5 +67,5 @@ spinBtn.addEventListener("click", () => {
 
     isSpinning = false;
     spinBtn.disabled = false;
-  }, duration + 300); // 300мс на всякий случай
+  }, duration + 300);
 });
