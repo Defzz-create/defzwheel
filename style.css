@@ -91,8 +91,9 @@ body {
 .arrow {
   position: absolute;
   left: 50%;
-  top: 5%;
-  transform: translateX(-50%);
+  top: 48%;
+  transform: translate(-50%, -50%);
+  margin-top: -215px;
   width: 0;
   height: 0;
   border: 0 solid transparent;
@@ -125,6 +126,7 @@ body {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
 }
+
 
 
 
