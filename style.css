@@ -1,20 +1,11 @@
-/*
-  ===================================================================
-  ГЛОБАЛЬНЫЕ СТИЛИ И ФОН
-  ===================================================================
-*/
-
 :root {
-  /* Переменная для размера колеса, чтобы легче менять стили */
   --wheel-size: 350px;
-  /* Переменная для смещения стрелки, чтобы она всегда была над колесом */
   --arrow-offset: 215px; 
-  --color-primary: #a29bfe; /* Основной акцентный цвет (неоновый фиолетовый) */
-  --color-secondary: #6c5ce7; /* Темный акцентный цвет */
+  --color-primary: #a29bfe;
+  --color-secondary: #6c5ce7;
 }
 
 body {
-  /* Усиление "неонового" эффекта более темным фоном */
   background: linear-gradient(120deg, #05051e, #1c003a);
   display: flex;
   flex-direction: column;
@@ -22,43 +13,22 @@ body {
   justify-content: center;
   height: 100vh;
   margin: 0;
-  /* Использование более выразительного шрифта, если подключен, или хороший запасной */
   font-family: 'Oswald', 'Bebas Neue', sans-serif;
-  color: white; /* Делаем текст на фоне по умолчанию белым */
+  color: white;
 }
-
-/*
-  ===================================================================
-  КОЛЕСО ФОРТУНЫ (#wheel)
-  ===================================================================
-*/
 
 #wheel {
   width: var(--wheel-size);
   height: var(--wheel-size);
   border-radius: 50%;
-  
-  /* Улучшенная граница и неоновое свечение */
   border: 10px solid var(--color-primary);
   position: relative;
-  /* Мы оставляем overflow: hidden, если ты хочешь применить transform к самому колесу, 
-    но если ты перейдешь на conic-gradient, это правило может быть изменено.
-  */
   overflow: hidden; 
   box-shadow: 
-      0 0 20px rgba(0, 0, 0, 0.4), /* Общая тень */
-      0 0 30px var(--color-primary), /* Неоновое свечение вокруг */
+      0 0 20px rgba(0, 0, 0, 0.4),
+      0 0 30px var(--color-primary),
       inset 0 0 15px rgba(0,0,0,0.25);
-  
-  /* Если бы мы использовали conic-gradient, то выглядело бы так: */
-  /* background: conic-gradient(#ff4d4d 0deg 60deg, #4dff4d 60deg 120deg, ...); */
 }
-
-/*
-  ===================================================================
-  СЕКТОРА (.sector)
-  ===================================================================
-*/
 
 .sector {
   position: absolute;
@@ -72,51 +42,30 @@ body {
   display: flex;
   justify-content: flex-end;
   align-items: center;
-  
-  /* Использование CSS-переменных из HTML */
   background: var(--color);
   transform: rotate(var(--angle)) skewY(30deg);
 }
 
-/*
-  ===================================================================
-  НАДПИСИ (.label)
-  ===================================================================
-*/
-
 .label {
   position: absolute;
-  /* Позиционируем относительно центра колеса */
   top: 50%;
   left: 50%;
   
   width: 100px;
   text-align: center;
   font-weight: bold;
-  color: white; /* Улучшенная читаемость на любом цвете сектора */
+  color: white;
   font-size: 17px;
-  
-  /* Transform-origin должен быть в центре колеса (0 0 относительно 50% 50%) */
   transform-origin: 0% 0%; 
-  
-  /* Использование CSS-переменных из HTML для поворота и смещения */
   transform: 
       rotate(var(--rot)) 
       translate(var(--dist))
-      translate(-50%, -50%); /* Добавляем -50% для центрирования самого текста */
-      
-  /* Более выразительный эффект тени */
+      translate(-50%, -50%);
   text-shadow: 0 0 3px black, 0 0 7px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 255, 255, 0.1);
 }
 
-/*
-  ===================================================================
-  КНОПКА КРУЧЕНИЯ (#spinBtn)
-  ===================================================================
-*/
-
 #spinBtn {
-  margin-top: 30px; /* Увеличил отступ */
+  margin-top: 30px;
   padding: 16px 40px; 
   font-size: 24px;
   cursor: pointer;
@@ -125,7 +74,6 @@ body {
   background: linear-gradient(45deg, var(--color-secondary), var(--color-primary));
   color: white;
   font-weight: bold;
-  /* Неоновый эффект + тень */
   box-shadow: 
       0 0 10px var(--color-primary),
       0 8px 25px rgba(0,0,0,0.6);
@@ -134,16 +82,16 @@ body {
 }
 
 #spinBtn:hover {
-  transform: scale(1.05); /* Немного уменьшил scale для более плавного эффекта */
+  transform: scale(1.05);
   box-shadow: 
-      0 0 15px var(--color-primary), /* Усиление свечения */
+      0 0 15px var(--color-primary),
       0 10px 30px rgba(0,0,0,0.8);
 }
 
 .arrow {
   position: absolute;
   left: 50%;
-  top: 26%;
+  top: 5%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
