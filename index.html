@@ -1,12 +1,12 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Колесо фортуны</title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Колесо фортуны</title>
   <style>
     body {
-      background: #000030;
+      background: linear-gradient(120deg, #000030, #3f007d);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -20,41 +20,95 @@
       width: 350px;
       height: 350px;
       border-radius: 50%;
-      border: 5px solid turquoise;
+      border: 5px solid black;
       position: relative;
       overflow: hidden;
+      box-shadow: 0 0 30px rgba(0,0,0,0.4), inset 0 0 15px rgba(0,0,0,0.25);
     }
 
     .sector {
       position: absolute;
-      width: 50%;
-      height: 50%;
+      width: 100%;
+      height: 100%;
       top: 50%;
       left: 50%;
-      transform-origin: 0% 0%;
+      transform-origin: 0 0;
       clip-path: polygon(0 0, 100% 0, 0 100%);
+      border: 1px solid black;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+
+    .label {
+        position: absolute;
+        top: 47%;
+        left: 36%;
+        width: 100px;
+        text-align: center;
+        font-weight: bold;
+        color: black;
+        font-size: 16px;
+        transform-origin: center center;
     }
 
     #spinBtn {
       margin-top: 20px;
-      padding: 10px 20px;
-      font-size: 18px;
+      padding: 14px 32px;
+      font-size: 24px;
       cursor: pointer;
+      border: none;
+      border-radius: 16px;
+      background: linear-gradient(45deg, #6c5ce7, #a29bfe);
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.4);
+      transition: all 0.2s ease;
+    }
+
+    #spinBtn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 8px 23px rgba(0,0,0,0.5);
+    }
+
+    .arrow {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      transform: translate(-50%, -50%);
+      margin-top: -215px;
+      width: 0;
+      height: 0;
+      border: 0 solid transparent;
+      border-left-width: 10px;
+      border-right-width: 10px;
+      border-top: 30px solid white;
+      z-index: 3;
     }
   </style>
 </head>
 <body>
-  <div id="wheel">
-    <div class="sector" style="transform: rotate(0deg) skewY(-30deg); border: 2px solid turquoise;"></div>
-    <div class="sector" style="transform: rotate(60deg) skewY(-30deg); border: 2px solid turquoise;"></div>
-    <div class="sector" style="transform: rotate(120deg) skewY(-30deg); border: 2px solid turquoise;"></div>
-    <div class="sector" style="transform: rotate(180deg) skewY(-30deg); border: 2px solid turquoise;"></div>
-    <div class="sector" style="transform: rotate(240deg) skewY(-30deg); border: 2px solid turquoise;"></div>
-    <div class="sector" style="transform: rotate(300deg) skewY(-30deg); border: 2px solid turquoise;"></div>
-  </div>
+<div id="wheel">
 
-  <button id="spinBtn">Крутить</button>
+<div class="sector" style="transform: rotate(90deg) skewY(30deg); background:#ff4d4d;"></div>
+<div class="sector" style="transform: rotate(150deg) skewY(30deg); background:#4dff4d;"></div>
+<div class="sector" style="transform: rotate(210deg) skewY(30deg); background:#4d4dff;"></div>
+<div class="sector" style="transform: rotate(270deg) skewY(30deg); background:#ff4dff;"></div>
+<div class="sector" style="transform: rotate(330deg) skewY(30deg); background:#4dffff;"></div>
+<div class="sector" style="transform: rotate(390deg) skewY(30deg); background:#ffff4d;"></div>
 
-  <script src="app.js"></script>
+<div class="label" style="transform: rotate(25deg) translate(100px)">Скидка 10% на маникюр</div>
+  <div class="label" style="transform: rotate(-35deg) translate(110px)">Скидка 10% на педекюр</div>
+  <div class="label" style="transform: rotate(90deg) translate(90px)">Скидка 5% на косметику</div>
+  <div class="label" style="transform: rotate(-90deg) translate(110px)">Бесплатный маникюр</div>
+  <div class="label" style="transform: rotate(155deg) translate(100px)">Бесплатные брови</div>
+  <div class="label" style="transform: rotate(220deg) translate(120px)">Депозит: 5.000 рублей</div>
+</div>
+
+<div class="arrow"></div>
+
+<button id="spinBtn">Крутить</button>
+
+<script src="app.js"></script>
 </body>
 </html>
