@@ -33,58 +33,61 @@ function showWinPopup(text) {
   }, 3000);
 }
 
-async function canUserSpin() {
-  try {
-    const resp = await fetch("/check_ip");
-    const data = await resp.json();
-    return data;
-  } catch (err) {
-    alert("Ошибка связи с сервером!");
-    return { can_spin: false, message: "Сервер недоступен" };
-  }
+function getRandomPrize() {
+  const index = Math.floor(Math.random() * PRIZES.length);
+  return PRIZES[index];
 }
 
-async function registerSpin() {
-  try {
-    await fetch("/register_spin", { method: "POST" });
-  } catch (err) {
-    console.error("Ошибка при регистрации спина:", err);
-  }
+function getTargetAngle(prizeText) {
+  const index = PRIZES.findIndex(p => p.text === prizeText);
+  const baseAngle = index * SECTOR_SIZE;
+  const offset = SECTOR_SIZE / 2;
+  const spins = Math.floor(Math.random() * 3 + 8); // 8-10 полных оборотов
+  return 360 * spins + (360 - (baseAngle + offset));
 }
 
+// Обработчик клика
 spinBtn.addEventListener("click", async () => {
   if (isSpinning) return;
 
-  const check = await canUserSpin();
-  if (!check.can_spin) {
-    alert(check.message);
+  // Проверка возможности крутить через сервер
+  let data;
+  try {
+    const resp = await fetch("/check_ip");
+    data = await resp.json();
+  } catch (e) {
+    alert("Ошибка связи с сервером!");
+    return;
+  }
+
+  if (!data.can_spin) {
+    alert(data.message);
     return;
   }
 
   isSpinning = true;
   spinBtn.disabled = true;
 
-  const minTurns = 8;
-  const maxTurns = 12;
-  const fullTurns = Math.floor(Math.random() * (maxTurns - minTurns + 1)) + minTurns;
-  const extraDeg = Math.floor(Math.random() * 360);
-  const totalDeg = 360 * fullTurns + extraDeg;
-  const duration = 6000;
+  const prize = getRandomPrize();
+  const targetDeg = getTargetAngle(prize.text);
+  deg += targetDeg;
 
-  deg += totalDeg;
-
-  wheel.style.transition = `transform ${duration}ms cubic-bezier(0.1, 0.25, 0.3, 1)`;
+  wheel.style.transition = `transform 6s cubic-bezier(0.1,0.25,0.3,1)`;
   wheel.style.transform = `rotate(${deg}deg)`;
 
   setTimeout(async () => {
     wheel.style.transition = "none";
-    const normalizedDeg = deg % 360;
-    wheel.style.transform = `rotate(${normalizedDeg}deg)`;
-    deg = normalizedDeg;
+    deg %= 360;
+    wheel.style.transform = `rotate(${deg}deg)`;
+    showWinPopup(prize.text);
 
-    const sectorText = getWinningSector(normalizedDeg);
-    showWinPopup(sectorText);
+    try {
+      await fetch("/register_spin", { method: "POST" });
+    } catch (e) {
+      console.error(e);
+    }
 
-    await registerSpin();
-
-    isSpinning = fals
+    isSpinning = false;
+    spinBtn.disabled = false;
+  }, 6000);
+});
