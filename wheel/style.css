@@ -6,7 +6,7 @@
 }
 
 body {
-  background: linear-gradient(120deg, #05051e, #1c003a);
+  background: linear-gradient(120deg, #737b54, #94ae29);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -124,4 +124,5 @@ body {
 .popup.visible {
   opacity: 1;
   transform: translate(-50%, -50%) scale(1);
+
 }
