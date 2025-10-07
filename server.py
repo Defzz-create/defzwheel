@@ -1,44 +1,52 @@
-from flask import Flask, request, jsonify
-import json, os, time
-from datetime import datetime, timedelta
+import json
+from datetime import datetime
+from flask import Flask, send_from_directory, request, jsonify
 
-app = Flask(__name__)
+app = Flask(__name__, static_folder='static')
+SPINS_FILE = "spins.json"
 
-DATA_FILE = "spins.json"
+def load_spins():
+    try:
+        with open(SPINS_FILE, "r") as f:
+            return json.load(f)
+    except FileNotFoundError:
+        return {}
+        
+def save_spins(data):
+    with open(SPINS_FILE, "w") as f:
+        json.dump(data, f, indent=4)
 
-if not os.path.exists(DATA_FILE):
-    with open(DATA_FILE, "w") as f:
-        json.dump({}, f)
+@app.route("/")
+def index():
+    return send_from_directory('static', 'koleso.html')
 
-def load_data():
-    with open(DATA_FILE, "r") as f:
-        return json.load(f)
+@app.route("/check_ip")
+def check_ip():
+    user_ip = request.remote_addr
+    spins = load_spins()
+    
+    now = datetime.now()
+    month_key = f"{now.year}-{now.month}"
 
-def save_data(data):
-    with open(DATA_FILE, "w") as f:
-        json.dump(data, f, indent=2)
+    if user_ip in spins and spins[user_ip].get("month") == month_key:
+        return jsonify({"can_spin": False, "message": "Вы уже прокручивали колесо в этом месяце!"})
 
-@app.route("/spin", methods=["POST"])
-def spin():
-    data = load_data()
-    user_id = str(request.json.get("user_id"))
-    now = datetime.utcnow()
+    return jsonify({"can_spin": True, "message": "Можно крутить"})
+    
+@app.route("/register_spin", methods=["POST"])
+def register_spin():
+    user_ip = request.remote_addr
+    spins = load_spins()
+    now = datetime.now()
+    month_key = f"{now.year}-{now.month}"
 
-    if user_id in data:
-        last_spin = datetime.fromisoformat(data[user_id])
-        if now - last_spin < timedelta(days=30):
-            return jsonify({
-                "status": "denied",
-                "message": "Вы уже крутили колесо в этом месяце!"
-            }), 403
+    spins[user_ip] = {"month": month_key, "last_spin": now.isoformat()}
+    save_spins(spins)
+    return jsonify({"status": "ok"})
 
-    data[user_id] = now.isoformat()
-    save_data(data)
-
-    return jsonify({
-        "status": "ok",
-        "message": "Можно крутить!"
-    })
+@app.route("/<path:path>")
+def static_files(path):
+    return send_from_directory('static', path)
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=10000)
+    app.run(debug=True)
