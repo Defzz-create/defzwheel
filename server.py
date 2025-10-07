@@ -1,18 +1,17 @@
-import json
+from flask import Flask, send_from_directory, jsonify, request
 from datetime import datetime
-from flask import Flask, send_from_directory, request, jsonify
+import json
+import os
 
 app = Flask(__name__, static_folder='wheel')
-
 SPINS_FILE = "spins.json"
 
 def load_spins():
-    try:
+    if os.path.exists(SPINS_FILE):
         with open(SPINS_FILE, "r") as f:
             return json.load(f)
-    except FileNotFoundError:
-        return {}
-        
+    return {}
+
 def save_spins(data):
     with open(SPINS_FILE, "w") as f:
         json.dump(data, f, indent=4)
@@ -25,7 +24,6 @@ def index():
 def check_ip():
     user_ip = request.remote_addr
     spins = load_spins()
-    
     now = datetime.now()
     month_key = f"{now.year}-{now.month}"
 
@@ -50,5 +48,4 @@ def static_files(path):
     return send_from_directory('wheel', path)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
