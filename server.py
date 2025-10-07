@@ -2,7 +2,8 @@ import json
 from datetime import datetime
 from flask import Flask, send_from_directory, request, jsonify
 
-app = Flask(__name__, static_folder='static')
+app = Flask(__name__, static_folder='wheel')
+
 SPINS_FILE = "spins.json"
 
 def load_spins():
@@ -18,7 +19,7 @@ def save_spins(data):
 
 @app.route("/")
 def index():
-    return send_from_directory('static', 'koleso.html')
+    return send_from_directory('wheel', 'index.html')
 
 @app.route("/check_ip")
 def check_ip():
@@ -32,7 +33,7 @@ def check_ip():
         return jsonify({"can_spin": False, "message": "Вы уже прокручивали колесо в этом месяце!"})
 
     return jsonify({"can_spin": True, "message": "Можно крутить"})
-    
+
 @app.route("/register_spin", methods=["POST"])
 def register_spin():
     user_ip = request.remote_addr
@@ -46,7 +47,7 @@ def register_spin():
 
 @app.route("/<path:path>")
 def static_files(path):
-    return send_from_directory('static', path)
+    return send_from_directory('wheel', path)
 
 if __name__ == "__main__":
     app.run(debug=True)
