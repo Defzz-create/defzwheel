@@ -33,8 +33,34 @@ function showWinPopup(text) {
   }, 3000);
 }
 
-spinBtn.addEventListener("click", () => {
+async function canUserSpin() {
+  try {
+    const resp = await fetch("/check_ip");
+    const data = await resp.json();
+    return data;
+  } catch (err) {
+    alert("Ошибка связи с сервером!");
+    return { can_spin: false, message: "Сервер недоступен" };
+  }
+}
+
+async function registerSpin() {
+  try {
+    await fetch("/register_spin", { method: "POST" });
+  } catch (err) {
+    console.error("Ошибка при регистрации спина:", err);
+  }
+}
+
+spinBtn.addEventListener("click", async () => {
   if (isSpinning) return;
+
+  const check = await canUserSpin();
+  if (!check.can_spin) {
+    alert(check.message);
+    return;
+  }
+
   isSpinning = true;
   spinBtn.disabled = true;
 
@@ -50,7 +76,7 @@ spinBtn.addEventListener("click", () => {
   wheel.style.transition = `transform ${duration}ms cubic-bezier(0.1, 0.25, 0.3, 1)`;
   wheel.style.transform = `rotate(${deg}deg)`;
 
-  setTimeout(() => {
+  setTimeout(async () => {
     wheel.style.transition = "none";
     const normalizedDeg = deg % 360;
     wheel.style.transform = `rotate(${normalizedDeg}deg)`;
@@ -59,7 +85,6 @@ spinBtn.addEventListener("click", () => {
     const sectorText = getWinningSector(normalizedDeg);
     showWinPopup(sectorText);
 
-    isSpinning = false;
-    spinBtn.disabled = false;
-  }, duration + 300);
-});
+    await registerSpin();
+
+    isSpinning = fals
