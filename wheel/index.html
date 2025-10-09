@@ -5,35 +5,31 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Колесо Фортуны</title>
   <link rel="stylesheet" href="style.css">
-
+<img src="https://i.ibb.co/1JZwSFBf/Brown-green.png" alt="NailCode" class="top-image">
 </head>
 <body>
   <div id="wheel">
 
-    <div class="sector" style="--angle: 270deg; --color: #806248;"></div>
-    <div class="sector" style="--angle: 330deg; --color: #CDB89D;"></div>
-    <div class="sector" style="--angle: 30deg; --color: #806248;"></div>
-    <div class="sector" style="--angle: 90deg; --color: #CDB89D;"></div>
-    <div class="sector" style="--angle: 150deg; --color: #806248;"></div>
-    <div class="sector" style="--angle: 210deg; --color: #CDB89D;"></div>
+    <div class="sector" style="--angle: 270deg; --color: linear-gradient(120deg, #806248, #563c2c);"></div>
+    <div class="sector" style="--angle: 330deg; --color: linear-gradient(120deg, #b8c68a, #586042);"></div>
+    <div class="sector" style="--angle: 30deg; --color: linear-gradient(120deg, #806248, #563c2c);"></div>
+    <div class="sector" style="--angle: 90deg; --color: linear-gradient(120deg, #b8c68a, #586042);"></div>
+    <div class="sector" style="--angle: 150deg; --color: linear-gradient(120deg, #806248, #563c2c);"></div>
+    <div class="sector" style="--angle: 210deg; --color: linear-gradient(120deg, #b8c68a, #586042);"></div>
 
-    <div class="label" style="--rot: 270deg; --dist: 105px;">Слот 1</div>
-    <div class="label" style="--rot: 330deg; --dist: 105px;">Слот 2</div>
-    <div class="label" style="--rot: 30deg; --dist: 105px;">Слот 3</div>
-    <div class="label" style="--rot: 90deg; --dist: 105px;">Слот 4</div>
-    <div class="label" style="--rot: 150deg; --dist: 105px;">Слот 5</div>
-    <div class="label" style="--rot: 210deg; --dist: 105px;">Слот 6</div>
+    <div class="label" style="--rot: 270deg; --dist: 105px;">Скидка - 5% на маникюр</div>
+    <div class="label" style="--rot: 330deg; --dist: 105px;">Скидка - 10% на маникюр</div>
+    <div class="label" style="--rot: 30deg; --dist: 105px;">Скидка - 5% на педекюр</div>
+    <div class="label" style="--rot: 90deg; --dist: 105px;">Скидка - 10% на педикюр</div>
+    <div class="label" style="--rot: 150deg; --dist: 105px;">Скидка - 5% на брови</div>
+    <div class="label" style="--rot: 210deg; --dist: 105px;">Скидка - 10% на брови</div>
 
   </div>
   <div class="arrow"></div>
   <button id="spinBtn">Крутить</button>
-  <div id="winPopup" class="popup">
-    <p id="winText"></p>
+  <div id="winPopup" class="popup" aria-live="polite">
+      <p id="winText"></p>
   </div>
-  <link rel="stylesheet" href="style.css">
-  <script src="script.js"></script>
+<script src="script.js"></script>
 </body>
 </html>
-
-
-
