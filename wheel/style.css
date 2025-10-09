@@ -90,7 +90,7 @@ body {
 .arrow {
   position: absolute;
   left: 50%;
-  top: 0%;
+  top: 15%;
   transform: translateX(-50%);
   width: 0;
   height: 0;
@@ -125,3 +125,4 @@ body {
   transform: translate(-50%, -50%) scale(1);
 
 }
+
