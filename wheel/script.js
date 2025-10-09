@@ -80,13 +80,19 @@ spinBtn.addEventListener("click", async () => {
     wheel.style.transform = `rotate(${deg}deg)`;
     showWinPopup(prize.text);
 
-    const username = prompt("Чтобы получить приз, введите ваш Telegram username без @:");
-    fetch("/send_prize", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ username: username || "Без имени", prize: sectorText })
-    });
-
+    const username = prompt("Введите ваш Telegram username без @:");
+    if (username) {
+      try {
+        await fetch("/send_prize", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ username: username, prize: prize.text })
+        });
+      } catch (e) {
+        console.error(e);
+      }
+    }
+    
     try {
       await fetch("/register_spin", { method: "POST" });
     } catch (e) {
@@ -97,3 +103,4 @@ spinBtn.addEventListener("click", async () => {
     spinBtn.disabled = false;
   }, 6000);
 });
+
