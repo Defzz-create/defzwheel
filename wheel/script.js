@@ -1,11 +1,11 @@
 document.addEventListener("DOMContentLoaded", () => {
   const PRIZES = [
-    { text: "Слот 1", angle: 270 },
-    { text: "Слот 2", angle: 330 },
-    { text: "Слот 3", angle: 30 },
-    { text: "Слот 4", angle: 90 },
-    { text: "Слот 5", angle: 150 },
-    { text: "Слот 6", angle: 210 },
+    { text: "Скидка - 5% на маникюр", angle: 270 },
+    { text: "Скидка - 10% на маникюр", angle: 330 },
+    { text: "Скидка - 5% на педекюр", angle: 30 },
+    { text: "Скидка - 10% на педикюр", angle: 90 },
+    { text: "Скидка - 5% на брови", angle: 150 },
+    { text: "Скидка - 10% на брови", angle: 210 },
   ];
 
   const SECTOR_SIZE = 360 / PRIZES.length;
@@ -85,3 +85,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 6000);
   });
 });
+
