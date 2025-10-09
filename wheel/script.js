@@ -1,10 +1,10 @@
 const PRIZES = [
-  { text: "Слот 1", angle: 390 },
-  { text: "Слот 2", angle: 270 },
-  { text: "Слот 3", angle: 330 },
-  { text: "Слот 4", angle: 30 },
-  { text: "Слот 5", angle: 90 },
-  { text: "Слот 6", angle: 150 },
+  { text: "Слот 1", angle: 30 },
+  { text: "Слот 2", angle: 90 },
+  { text: "Слот 3", angle: 150 },
+  { text: "Слот 4", angle: 210 },
+  { text: "Слот 5", angle: 270 },
+  { text: "Слот 6", angle: 330 },
 ];
 
 const SECTOR_SIZE = 360 / PRIZES.length;
@@ -17,25 +17,17 @@ const winText = document.getElementById("winText");
 let isSpinning = false;
 let deg = 0;
 
-function getRandomPrize() {
-  const index = Math.floor(Math.random() * PRIZES.length);
-  return PRIZES[index];
-}
-
-function getTargetAngle(prizeText) {
-  const index = PRIZES.findIndex(p => p.text === prizeText);
-  const baseAngle = index * SECTOR_SIZE;
-  const offset = SECTOR_SIZE / 2;
-  const spins = Math.floor(Math.random() * 3 + 8);
-  return 360 * spins + (360 - (baseAngle + offset));
+function getWinningSector(angle) {
+  const normalizedAngle = (angle % 360 + 360) % 360;
+  const corrected = (360 - normalizedAngle + SECTOR_SIZE / 2) % 360;
+  const index = Math.floor(corrected / SECTOR_SIZE);
+  return PRIZES[index].text;
 }
 
 function showWinPopup(text) {
   winText.innerHTML = `🎉 Вы выиграли: <strong>${text}</strong>`;
   popup.classList.add("visible");
-  setTimeout(() => {
-    popup.classList.remove("visible");
-  }, 3500);
+  setTimeout(() => popup.classList.remove("visible"), 3000);
 }
 
 spinBtn.addEventListener("click", async () => {
@@ -57,7 +49,7 @@ spinBtn.addEventListener("click", async () => {
 
   isSpinning = true;
   spinBtn.disabled = true;
-  
+
   const minTurns = 8;
   const maxTurns = 12;
   const fullTurns = Math.floor(Math.random() * (maxTurns - minTurns + 1)) + minTurns;
@@ -70,11 +62,10 @@ spinBtn.addEventListener("click", async () => {
 
   setTimeout(async () => {
     wheel.style.transition = "none";
-    const normalizedDeg = deg % 360;
-    wheel.style.transform = `rotate(${normalizedDeg}deg)`;
-    deg = normalizedDeg;
+    deg %= 360;
+    wheel.style.transform = `rotate(${deg}deg)`;
 
-    const sectorText = getWinningSector(normalizedDeg); 
+    const sectorText = getWinningSector(deg);
     showWinPopup(sectorText);
 
     const username = prompt("Введите ваш Telegram username без @:");
@@ -85,12 +76,10 @@ spinBtn.addEventListener("click", async () => {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ username: username, prize: sectorText })
         });
-      } catch {}
+      } catch (e) { console.error(e); }
     }
 
-    try {
-      await fetch("/register_spin", { method: "POST" });
-    } catch {}
+    try { await fetch("/register_spin", { method: "POST" }); } catch (e) { console.error(e); }
 
     isSpinning = false;
     spinBtn.disabled = false;
