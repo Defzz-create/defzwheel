@@ -33,6 +33,7 @@ function showWinPopup(text) {
   }, 3000);
 }
 
+
 function getRandomPrize() {
   const index = Math.floor(Math.random() * PRIZES.length);
   return PRIZES[index];
@@ -46,11 +47,9 @@ function getTargetAngle(prizeText) {
   return 360 * spins + (360 - (baseAngle + offset));
 }
 
-// Обработчик клика
 spinBtn.addEventListener("click", async () => {
   if (isSpinning) return;
 
-  // Проверка возможности крутить через сервер
   let data;
   try {
     const resp = await fetch("/check_ip");
@@ -81,6 +80,13 @@ spinBtn.addEventListener("click", async () => {
     wheel.style.transform = `rotate(${deg}deg)`;
     showWinPopup(prize.text);
 
+    const username = prompt("Чтобы получить приз, введите ваш Telegram username без @:");
+    fetch("/send_prize", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: username || "Без имени", prize: sectorText })
+    });
+
     try {
       await fetch("/register_spin", { method: "POST" });
     } catch (e) {
@@ -91,4 +97,3 @@ spinBtn.addEventListener("click", async () => {
     spinBtn.disabled = false;
   }, 6000);
 });
-
