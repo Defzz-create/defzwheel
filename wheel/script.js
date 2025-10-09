@@ -1,87 +1,92 @@
-const PRIZES = [
-  { text: "Слот 1", angle: 30 },
-  { text: "Слот 2", angle: 90 },
-  { text: "Слот 3", angle: 150 },
-  { text: "Слот 4", angle: 210 },
-  { text: "Слот 5", angle: 270 },
-  { text: "Слот 6", angle: 330 },
-];
+document.addEventListener("DOMContentLoaded", () => {
 
-const SECTOR_SIZE = 360 / PRIZES.length;
+  const PRIZES = [
+    { text: "Слот 1", angle: 30 },
+    { text: "Слот 2", angle: 90 },
+    { text: "Слот 3", angle: 150 },
+    { text: "Слот 4", angle: 210 },
+    { text: "Слот 5", angle: 270 },
+    { text: "Слот 6", angle: 330 },
+  ];
 
-const wheel = document.getElementById("wheel");
-const spinBtn = document.getElementById("spinBtn");
-const popup = document.getElementById("winPopup");
-const winText = document.getElementById("winText");
+  const SECTOR_SIZE = 360 / PRIZES.length;
 
-let isSpinning = false;
-let deg = 0;
+  const wheel = document.getElementById("wheel");
+  const spinBtn = document.getElementById("spinBtn");
+  const popup = document.getElementById("winPopup");
+  const winText = document.getElementById("winText");
 
-function getWinningSector(angle) {
-  const normalizedAngle = (angle % 360 + 360) % 360;
-  const corrected = (360 - normalizedAngle + SECTOR_SIZE / 2) % 360;
-  const index = Math.floor(corrected / SECTOR_SIZE);
-  return PRIZES[index].text;
-}
+  let isSpinning = false;
+  let deg = 0;
 
-function showWinPopup(text) {
-  winText.innerHTML = `🎉 Вы выиграли: <strong>${text}</strong>`;
-  popup.classList.add("visible");
-  setTimeout(() => popup.classList.remove("visible"), 3000);
-}
-
-spinBtn.addEventListener("click", async () => {
-  if (isSpinning) return;
-
-  let data;
-  try {
-    const resp = await fetch("/check_ip");
-    data = await resp.json();
-  } catch {
-    alert("Ошибка связи с сервером!");
-    return;
+  function getWinningSector(angle) {
+    const normalizedAngle = (angle % 360 + 360) % 360;
+    const corrected = (360 - normalizedAngle + SECTOR_SIZE / 2) % 360;
+    const index = Math.floor(corrected / SECTOR_SIZE);
+    return PRIZES[index].text;
   }
 
-  if (!data.can_spin) {
-    alert(data.message);
-    return;
+  function showWinPopup(text) {
+    winText.innerHTML = `🎉 Вы выиграли: <strong>${text}</strong>`;
+    popup.classList.add("visible");
+    setTimeout(() => popup.classList.remove("visible"), 3000);
   }
 
-  isSpinning = true;
-  spinBtn.disabled = true;
+  spinBtn.addEventListener("click", async () => {
+    if (isSpinning) return;
 
-  const minTurns = 8;
-  const maxTurns = 12;
-  const fullTurns = Math.floor(Math.random() * (maxTurns - minTurns + 1)) + minTurns;
-  const extraDeg = Math.floor(Math.random() * 360);
-  const totalDeg = 360 * fullTurns + extraDeg;
-  deg += totalDeg;
-
-  wheel.style.transition = `transform 6s cubic-bezier(0.1,0.25,0.3,1)`;
-  wheel.style.transform = `rotate(${deg}deg)`;
-
-  setTimeout(async () => {
-    wheel.style.transition = "none";
-    deg %= 360;
-    wheel.style.transform = `rotate(${deg}deg)`;
-
-    const sectorText = getWinningSector(deg);
-    showWinPopup(sectorText);
-
-    const username = prompt("Введите ваш Telegram username без @:");
-    if (username) {
-      try {
-        await fetch("/send_prize", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: username, prize: sectorText })
-        });
-      } catch (e) { console.error(e); }
+    let data;
+    try {
+      const resp = await fetch("/check_ip");
+      data = await resp.json();
+    } catch {
+      alert("Ошибка связи с сервером!");
+      return;
     }
 
-    try { await fetch("/register_spin", { method: "POST" }); } catch (e) { console.error(e); }
+    if (!data.can_spin) {
+      alert(data.message);
+      return;
+    }
 
-    isSpinning = false;
-    spinBtn.disabled = false;
-  }, 6000);
+    isSpinning = true;
+    spinBtn.disabled = true;
+
+    const minTurns = 8;
+    const maxTurns = 12;
+    const fullTurns = Math.floor(Math.random() * (maxTurns - minTurns + 1)) + minTurns;
+    const extraDeg = Math.floor(Math.random() * 360);
+    const totalDeg = 360 * fullTurns + extraDeg;
+    deg += totalDeg;
+
+    wheel.style.transition = `transform 6s cubic-bezier(0.1,0.25,0.3,1)`;
+    wheel.style.transform = `rotate(${deg}deg)`;
+
+    setTimeout(async () => {
+      wheel.style.transition = "none";
+      deg %= 360;
+      wheel.style.transform = `rotate(${deg}deg)`;
+
+      const sectorText = getWinningSector(deg);
+      showWinPopup(sectorText);
+
+      const username = prompt("Введите ваш Telegram username без @:");
+      if (username) {
+        try {
+          await fetch("/send_prize", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: username, prize: sectorText })
+          });
+        } catch (e) { console.error(e); }
+      }
+
+      try { await fetch("/register_spin", { method: "POST" }); } catch (e) { console.error(e); }
+
+      isSpinning = false;
+      spinBtn.disabled = false;
+    }, 6000);
+
+  });
+
 });
