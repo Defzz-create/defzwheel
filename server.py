@@ -1,70 +1,78 @@
-from flask import Flask, send_from_directory, jsonify, request
-from datetime import datetime
-import json
-import os
-import requests
+from flask import Flask, request, jsonify, send_from_directory
+from datetime import datetime, timedelta
+import os, json, requests
 
-bot_token = '8484039904:AAG_AU03u1kdnxp8V-g0MFNmx0iLJPUn6lY'
-admin_id = 714698934
+app = Flask(__name__)
 
-app = Flask(__name__, static_folder='wheel')
-SPINS_FILE = "spins.json"
+spins = "spins.json"
+token = os.getenv("tg_bot_token")
+id = os.getenv("tg_id")
 
 def load_spins():
-    if os.path.exists(SPINS_FILE):
-        with open(SPINS_FILE, "r") as f:
+    if not os.path.exists(spins):
+        return {}
+    with open(spins, "r", encoding="utf-8") as f:
+        try:
             return json.load(f)
-    return {}
+        except:
+            return {}
 
 def save_spins(data):
-    with open(SPINS_FILE, "w") as f:
-        json.dump(data, f, indent=4)
+    with open(spins, "w", encoding="utf-8") as f:
+        json.dump(data, f, ensure_ascii=False, indent=2)
 
-@app.route("/")
-def index():
-    return send_from_directory('wheel', 'index.html')
+def send_telegram_message(username, prize):
+    if not token or not id:
+        print("❌ tg_bot_token или tg_id не указаны в Render Settings.")
+        return
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+    data = {
+        "chat_id": id,
+        "text": f"🎯 <b>Новый выигрыш!</b>\n👤 Пользователь: @{username}\n🎁 Приз: {prize}",
+        "parse_mode": "HTML"
+    }
+    try:
+        requests.post(url, data=data)
+    except Exception as e:
+        print("Ошибка отправки в Telegram:", e)
 
 @app.route("/check_ip")
 def check_ip():
-    user_ip = request.remote_addr
+    ip = request.remote_addr
     spins = load_spins()
     now = datetime.now()
-    month_key = f"{now.year}-{now.month}"
 
-    if user_ip in spins and spins[user_ip].get("month") == month_key:
-        return jsonify({"can_spin": False, "message": "Вы уже прокручивали колесо в этом месяце!"})
+    if ip in spins:
+        last_spin = datetime.fromisoformat(spins[ip])
+        if now - last_spin < timedelta(days=30):
+            return jsonify({"can_spin": False, "message": "Вы уже крутили барабан! Повторная попытка через месяц."})
 
-    return jsonify({"can_spin": True, "message": "Можно крутить"})
+    return jsonify({"can_spin": True})
 
 @app.route("/register_spin", methods=["POST"])
 def register_spin():
-    user_ip = request.remote_addr
+    ip = request.remote_addr
     spins = load_spins()
-    now = datetime.now()
-    month_key = f"{now.year}-{now.month}"
-
-    spins[user_ip] = {"month": month_key, "last_spin": now.isoformat()}
+    spins[ip] = datetime.now().isoformat()
     save_spins(spins)
     return jsonify({"status": "ok"})
-
-@app.route("/<path:path>")
-def static_files(path):
-    return send_from_directory('wheel', path)
 
 @app.route("/send_prize", methods=["POST"])
 def send_prize():
     data = request.json
-    username = data.get("username", "Неизвестен")
+    username = data.get("username", "Неизвестный пользователь")
     prize = data.get("prize", "Без приза")
+    send_telegram_message(username, prize)
+    return jsonify({"status": "ok"})
 
-    message = f"🎯 Новый приз!\n👤 Пользователь: @{username}\n🎁 Приз: {prize}"
-    url = f"https://api.telegram.org/bot{bot_token}/sendMessage"
+@app.route("/")
+def index():
+    return send_from_directory("wheel", "index.html")
 
-    try:
-        requests.post(url, json={"chat_id": admin_id, "text": message})
-        return jsonify({"success": True})
-    except Exception as e:
-        return jsonify({"success": False, "error": str(e)})
+@app.route("/<path:path>")
+def static_files(path):
+    return send_from_directory("wheel", path)
+
 
 if __name__ == "__main__":
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 10000)))
+    app.run(host="0.0.0.0", port=10000)
