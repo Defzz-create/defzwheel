@@ -57,19 +57,25 @@ spinBtn.addEventListener("click", async () => {
 
   isSpinning = true;
   spinBtn.disabled = true;
-
-  const prize = getRandomPrize();
-  const targetDeg = getTargetAngle(prize.text);
-  deg += targetDeg;
+  
+  const minTurns = 8;
+  const maxTurns = 12;
+  const fullTurns = Math.floor(Math.random() * (maxTurns - minTurns + 1)) + minTurns;
+  const extraDeg = Math.floor(Math.random() * 360);
+  const totalDeg = 360 * fullTurns + extraDeg;
+  deg += totalDeg;
 
   wheel.style.transition = `transform 6s cubic-bezier(0.1,0.25,0.3,1)`;
   wheel.style.transform = `rotate(${deg}deg)`;
 
   setTimeout(async () => {
     wheel.style.transition = "none";
-    deg %= 360;
-    wheel.style.transform = `rotate(${deg}deg)`;
-    showWinPopup(prize.text);
+    const normalizedDeg = deg % 360;
+    wheel.style.transform = `rotate(${normalizedDeg}deg)`;
+    deg = normalizedDeg;
+
+    const sectorText = getWinningSector(normalizedDeg); 
+    showWinPopup(sectorText);
 
     const username = prompt("Введите ваш Telegram username без @:");
     if (username) {
@@ -77,7 +83,7 @@ spinBtn.addEventListener("click", async () => {
         await fetch("/send_prize", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ username: username, prize: prize.text })
+          body: JSON.stringify({ username: username, prize: sectorText })
         });
       } catch {}
     }
