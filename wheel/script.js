@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-
   const PRIZES = [
     { text: "Слот 1", angle: 30 },
     { text: "Слот 2", angle: 90 },
@@ -19,11 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
   let isSpinning = false;
   let deg = 0;
 
-  function getWinningSector(angle) {
-    const normalizedAngle = (angle % 360 + 360) % 360;
+  function getWinningSector(finalDeg) {
+    const normalizedAngle = (finalDeg % 360 + 360) % 360;
     const corrected = (360 - normalizedAngle + SECTOR_SIZE / 2) % 360;
     const index = Math.floor(corrected / SECTOR_SIZE);
-    return PRIZES[index].text;
+    return PRIZES[index];
   }
 
   function showWinPopup(text) {
@@ -67,26 +66,33 @@ document.addEventListener("DOMContentLoaded", () => {
       deg %= 360;
       wheel.style.transform = `rotate(${deg}deg)`;
 
-      const sectorText = getWinningSector(deg);
-      showWinPopup(sectorText);
+      // Вычисляем выигранный сектор
+      const winningPrize = getWinningSector(deg);
 
-      const username = prompt("Введите ваш Telegram username без @:");
-      if (username) {
-        try {
-          await fetch("/send_prize", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ username: username, prize: sectorText })
-          });
-        } catch (e) { console.error(e); }
-      }
+      // Сначала показываем popup с выигранным призом
+      showWinPopup(winningPrize.text);
 
-      try { await fetch("/register_spin", { method: "POST" }); } catch (e) { console.error(e); }
+      // Даем паузу на показ popup (3 сек)
+      setTimeout(async () => {
+        // Запрос username после анимации и показа popup
+        const username = prompt("Введите ваш Telegram username без @:");
+        if (username) {
+          try {
+            await fetch("/send_prize", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ username: username, prize: winningPrize.text })
+            });
+          } catch (e) { console.error(e); }
+        }
 
-      isSpinning = false;
-      spinBtn.disabled = false;
+        try { await fetch("/register_spin", { method: "POST" }); } catch (e) { console.error(e); }
+
+        isSpinning = false;
+        spinBtn.disabled = false;
+      }, 3000);
+
     }, 6000);
 
   });
-
 });
