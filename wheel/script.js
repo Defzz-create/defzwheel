@@ -1,15 +1,14 @@
 document.addEventListener("DOMContentLoaded", () => {
   const PRIZES = [
-    { text: "Слот 1", angle: 30 },
-    { text: "Слот 2", angle: 90 },
-    { text: "Слот 3", angle: 150 },
-    { text: "Слот 4", angle: 210 },
-    { text: "Слот 5", angle: 270 },
-    { text: "Слот 6", angle: 330 },
+    { text: "Слот 1", angle: 270 },
+    { text: "Слот 2", angle: 330 },
+    { text: "Слот 3", angle: 30 },
+    { text: "Слот 4", angle: 90 },
+    { text: "Слот 5", angle: 150 },
+    { text: "Слот 6", angle: 210 },
   ];
 
   const SECTOR_SIZE = 360 / PRIZES.length;
-
   const wheel = document.getElementById("wheel");
   const spinBtn = document.getElementById("spinBtn");
   const popup = document.getElementById("winPopup");
@@ -33,7 +32,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
   spinBtn.addEventListener("click", async () => {
     if (isSpinning) return;
-
     let data;
     try {
       const resp = await fetch("/check_ip");
@@ -65,16 +63,10 @@ document.addEventListener("DOMContentLoaded", () => {
       wheel.style.transition = "none";
       deg %= 360;
       wheel.style.transform = `rotate(${deg}deg)`;
-
-      // Вычисляем выигранный сектор
       const winningPrize = getWinningSector(deg);
-
-      // Сначала показываем popup с выигранным призом
       showWinPopup(winningPrize.text);
 
-      // Даем паузу на показ popup (3 сек)
       setTimeout(async () => {
-        // Запрос username после анимации и показа popup
         const username = prompt("Введите ваш Telegram username без @:");
         if (username) {
           try {
@@ -85,14 +77,11 @@ document.addEventListener("DOMContentLoaded", () => {
             });
           } catch (e) { console.error(e); }
         }
-
         try { await fetch("/register_spin", { method: "POST" }); } catch (e) { console.error(e); }
-
         isSpinning = false;
-        spinBtn.disabled = false;
+        spinBtn.disabled = true;
       }, 3000);
 
     }, 6000);
-
   });
 });
