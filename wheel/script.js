@@ -1,10 +1,10 @@
 const PRIZES = [
-  { text: "Бесплатный маникюр", angle: 30 },
-  { text: "Скидка 10% на педекюр", angle: 270 },
-  { text: "Скидка 10% на маникюр", angle: 390 },
-  { text: "Скидка 5% на косметику", angle: 330 },
-  { text: "Бесплатные брови", angle: 90 },
-  { text: "Депозит: 5.000 рублей", angle: 150 },
+  { text: "Слот 4", angle: 30 },
+  { text: "Слот 2", angle: 270 },
+  { text: "Слот 1", angle: 390 },
+  { text: "Слот 3", angle: 330 },
+  { text: "Слот 5", angle: 90 },
+  { text: "Слот 6", angle: 150 },
 ];
 
 const SECTOR_SIZE = 360 / PRIZES.length;
@@ -91,3 +91,4 @@ spinBtn.addEventListener("click", async () => {
     spinBtn.disabled = false;
   }, 6000);
 });
+
