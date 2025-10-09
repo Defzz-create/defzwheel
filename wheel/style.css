@@ -103,7 +103,7 @@ body {
 .arrow {
     position: absolute;
     left: 50%;
-    top: 20%;
+    top: 30%;
     transform: translateX(-50%);
     width: 0;
     height: 0;
@@ -135,9 +135,9 @@ body {
 
 .top-image {
   display: block;
-  width: 330px;
+  width: 340px;
   margin: 0 auto;
-  margin-bottom: 20px;
+  margin-bottom: 60px;
   z-index: 1;
   position: relative;
 }
@@ -146,3 +146,4 @@ body {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
 }
+
