@@ -1,36 +1,25 @@
 <!doctype html>
 <html lang="ru">
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Колесо Фортуны</title>
-  <link rel="stylesheet" href="style.css">
-  <img src="https://i.ibb.co/1JZwSFBf/Brown-green.png" alt="NailCode" class="top-image">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Колесо Фортуны | NailCode</title>
+  <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;700&display=swap" rel="stylesheet">
 </head>
 <body>
-  <div id="wheel">
-
-    <div class="sector" style="--angle: 270deg; --color: linear-gradient(120deg, #806248, #563c2c);"></div>
-    <div class="sector" style="--angle: 330deg; --color: linear-gradient(120deg, #b8c68a, #586042);"></div>
-    <div class="sector" style="--angle: 30deg; --color: linear-gradient(120deg, #806248, #563c2c);"></div>
-    <div class="sector" style="--angle: 90deg; --color: linear-gradient(120deg, #b8c68a, #586042);"></div>
-    <div class="sector" style="--angle: 150deg; --color: linear-gradient(120deg, #806248, #563c2c);"></div>
-    <div class="sector" style="--angle: 210deg; --color: linear-gradient(120deg, #b8c68a, #586042);"></div>
-
-    <div class="label" style="--rot: 270deg; --dist: 105px;">Скидка - 5% на маникюр</div>
-    <div class="label" style="--rot: 330deg; --dist: 105px;">Скидка - 10% на маникюр</div>
-    <div class="label" style="--rot: 30deg; --dist: 105px;">Скидка - 5% на педекюр</div>
-    <div class="label" style="--rot: 90deg; --dist: 105px;">Скидка - 10% на педикюр</div>
-    <div class="label" style="--rot: 150deg; --dist: 105px;">Скидка - 5% на брови</div>
-    <div class="label" style="--rot: 210deg; --dist: 105px;">Скидка - 10% на брови</div>
-
-  </div>
   <div class="arrow"></div>
-  <button id="spinBtn">Крутить</button>
-  <div id="winPopup" class="popup" aria-live="polite">
-      <p id="winText"></p>
-  </div>
-<script src="script.js"></script>
+  <img src="https://i.ibb.co/1JZwSFBf/Brown-green.png" alt="NailCode логотип" class="top-image">
+
+  <div class="wheel-container">
+    <canvas id="wheelCanvas" width="400" height="400"></canvas>
+  </div>
+  
+  <button id="spinBtn">Крутить</button>
+  <p id="result" class="result"></p>  
+  
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js" defer></script>
+  <script src="https://cdn.jsdelivr.net/gh/zarocknz/javascript-winwheel/Winwheel.min.js" defer></script>
+  <script src="script.js" defer></script>
 </body>
 </html>
-
