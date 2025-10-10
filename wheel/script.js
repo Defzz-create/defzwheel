@@ -39,9 +39,10 @@ function chooseSegmentByRTP() {
 const wheel = new Winwheel({
   canvasId: 'wheelCanvas',
   numSegments: prizes.length,
-  outerRadius: 205,
+  outerRadius: 177,
+  textFontSize: 18,
   textFillStyle: '#fff',
-  textMargin: 25,
+  textMargin: 18,
   segments: prizes.map((p, i) => ({ fillStyle: getSegmentGradient(i), text: p.text })),
   animation: { type: 'spinToStop', duration: 5, spins: 8, callbackFinished: onFinish }
 });
