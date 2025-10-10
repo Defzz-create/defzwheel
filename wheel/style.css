@@ -11,12 +11,12 @@ body {
 
 canvas {
     margin-top: 40px;
-    background: #b8c68a;
+    background: #abb980;
     border-radius: 50%;
-    border: 10px solid #b8c68a;
+    border: 10px solid #abb980;
     box-shadow:
         0 0 20px rgba(0,0,0,0.4),
-        0 0 30px #b8c68a,
+        0 0 30px #abb980,
         inset 0 0 15px rgba(0,0,0,0.25);
 }
 
@@ -87,4 +87,13 @@ canvas {
     border-right-width: 15px;
     border-top: 35px solid white;
     filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+}
+
+.top-image {
+  display: block;
+  width: 350px;
+  margin: 0 auto;
+  margin-bottom: 50px;
+  z-index: 1;
+  position: relative;
 }
