@@ -1,12 +1,3 @@
-:root {
-    --wheel-size: 350px;
-    --color-primary: #b8c68a;
-    --color-secondary: #c1d290;
-    --spin-duration: 6s;
-    --arrow-width: 15px;
-    --arrow-height: 35px;
-}
-
 body {
     background: linear-gradient(120deg, #dfbfa8, #ac9381);
     display: flex;
@@ -15,52 +6,18 @@ body {
     justify-content: center;
     min-height: 100vh;
     margin: 0;
-    font-family: sans-serif;
-    color: white;
-    box-sizing: border-box;
+    font-family: "Oswald", sans-serif;
 }
 
-#wheel {
-    width: var(--wheel-size);
-    height: var(--wheel-size);
+canvas {
+    margin-top: 40px;
+    background: #b8c68a;
     border-radius: 50%;
-    border: 10px solid var(--color-primary);
-    position: relative;
-    overflow: hidden;
+    border: 10px solid #b8c68a;
     box-shadow:
-        0 0 20px rgba(0, 0, 0, 0.4),
-        0 0 30px var(--color-primary),
-        inset 0 0 15px rgba(0, 0, 0, 0.25);
-}
-
-.sector {
-    position: absolute;
-    border: 1px solid black;
-    width: 100%;
-    height: 100%;
-    top: 50%;
-    left: 50%;
-    transform-origin: 0 0;
-    clip-path: polygon(0 0, 100% 0, 0 100%);
-    background: var(--color);
-    transform: rotate(var(--angle)) skewY(30deg);
-}
-
-.label {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    width: 100px;
-    text-align: center;
-    font-weight: bold;
-    color: white;
-    font-size: 17px;
-    transform-origin: 0% 0%;
-    transform:
-        rotate(var(--rot))
-        translate(var(--dist))
-        translate(-50%, -50%);
-    text-shadow: 0 0 3px black, 0 0 7px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 255, 255, 0.1);
+        0 0 20px rgba(0,0,0,0.4),
+        0 0 30px #b8c68a,
+        inset 0 0 15px rgba(0,0,0,0.25);
 }
 
 #spinBtn {
@@ -70,21 +27,20 @@ body {
     cursor: pointer;
     border: none;
     border-radius: 16px;
-    background: linear-gradient(45deg, var(--color-secondary), var(--color-primary));
+    background: linear-gradient(45deg, #c1d290, #b8c68a);
     color: white;
-    text-shadow: 0 0 1px black, 0 0 7px rgba(0, 0, 0, 0.7), 0 0 15px rgba(255, 255, 255, 0.1);
+    text-shadow: 0 0 1px black, 0 0 7px rgba(0,0,0,0.7), 0 0 15px rgba(255,255,255,0.1);
     font-weight: bold;
-    box-shadow:
-        0 0 10px var(--color-primary),
-        0 8px 25px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 10px #b8c68a, 0 8px 25px rgba(0,0,0,0.6);
     transition: all 0.3s ease;
     text-transform: uppercase;
+    perspective: 500px;
 }
 
 #spinBtn:hover {
     transform: scale(1.05);
     box-shadow:
-        0 0 15px var(--color-primary),
+        0 0 15px #b8c68a,
         0 10px 30px rgba(0, 0, 0, 0.8);
 }
 
@@ -92,58 +48,43 @@ body {
     opacity: 0.6;
     cursor: not-allowed;
     transform: none;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
 #spinBtn:disabled:hover {
     transform: none;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+    box-shadow: 0 0 10px rgba(0,0,0,0.5);
 }
 
-.arrow {
-    position: absolute;
-    left: 50%;
-    top: 30%;
-    transform: translateX(-50%);
-    width: 0;
-    height: 0;
-    border: 0 solid transparent;
-    border-left-width: var(--arrow-width);
-    border-right-width: var(--arrow-width);
-    border-top: var(--arrow-height) solid white;
-    z-index: 3;
-    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
-}
-
-.popup {
+.result {
     position: fixed;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%) scale(0.8);
-    background: rgba(0, 0, 0, 0.95);
+    background: rgba(0,0,0,0.95);
     color: white;
     padding: 25px 45px;
     border-radius: 12px;
     font-size: 22px;
     text-align: center;
     opacity: 0;
-    transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-    box-shadow: 0 0 15px var(--color-primary), 0 0 35px rgba(206, 223, 154, 0.6);
+    transition: all 0.5s cubic-bezier(0.175,0.885,0.32,1.275);
+    box-shadow: 0 0 10px #b8c68a, 0 0 35px rgba(206,223,154,0.6);
     z-index: 9999;
-    border: 1px solid var(--color-primary);
+    border: 1px solid #b8c68a;
 }
 
-.top-image {
-  display: block;
-  width: 340px;
-  margin: 0 auto;
-  margin-bottom: 60px;
-  z-index: 1;
-  position: relative;
-}
-
-.popup.visible {
+.result.visible {
     opacity: 1;
     transform: translate(-50%, -50%) scale(1);
 }
 
+.arrow {
+    position: absolute;
+    top: 40%;
+    border: 0 solid transparent;
+    border-left-width: 15px;
+    border-right-width: 15px;
+    border-top: 35px solid white;
+    filter: drop-shadow(0 0 5px rgba(255, 255, 255, 0.5));
+}
