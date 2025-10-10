@@ -21,7 +21,7 @@ canvas {
 }
 
 #spinBtn {
-    margin-top: 30px;
+    margin-top: 15px;
     padding: 16px 40px;
     font-size: 24px;
     cursor: pointer;
@@ -81,7 +81,7 @@ canvas {
 
 .arrow {
     position: absolute;
-    top: 40%;
+    top: 30%;
     border: 0 solid transparent;
     border-left-width: 15px;
     border-right-width: 15px;
@@ -93,7 +93,7 @@ canvas {
   display: block;
   width: 350px;
   margin: 0 auto;
-  margin-bottom: 50px;
+  margin-bottom: 5px;
   z-index: 1;
   position: relative;
 }
