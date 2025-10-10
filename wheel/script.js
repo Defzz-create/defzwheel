@@ -1,88 +1,109 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const PRIZES = [
-    { text: "Скидка - 5% на маникюр", angle: 270 },
-    { text: "Скидка - 10% на маникюр", angle: 330 },
-    { text: "Скидка - 5% на педекюр", angle: 30 },
-    { text: "Скидка - 10% на педикюр", angle: 90 },
-    { text: "Скидка - 5% на брови", angle: 150 },
-    { text: "Скидка - 10% на брови", angle: 210 },
-  ];
+const canvas = document.getElementById('wheelCanvas');
+const ctx = canvas.getContext('2d');
+const spinBtn = document.getElementById('spinBtn');
+const result = document.getElementById('result');
 
-  const SECTOR_SIZE = 360 / PRIZES.length;
-  const wheel = document.getElementById("wheel");
-  const spinBtn = document.getElementById("spinBtn");
-  const popup = document.getElementById("winPopup");
-  const winText = document.getElementById("winText");
+const prizes = [
+  { text: "Скидка - 5%\nна маникюр", probability: 0.2 },
+  { text: "Скидка - 10%\nна маникюр", probability: 0.1 },
+  { text: "Скидка - 5%\nна педикюр", probability: 0.2 },
+  { text: "Скидка - 10%\nна педикюр", probability: 0.1 },
+  { text: "Скидка - 5%\nна брови", probability: 0.2 },
+  { text: "Скидка - 10%\nна брови", probability: 0.1 },
+  { text: "Бесплатные\nброви", probability: 0.05 },
+  { text: "Бесплатная\nмаска для лица", probability: 0.05 }
+];
 
-  let isSpinning = false;
-  let deg = 0;
-
-  function getWinningSector(finalDeg) {
-    const normalizedAngle = (finalDeg % 360 + 360) % 360;
-    const corrected = (360 - normalizedAngle + SECTOR_SIZE / 2) % 360;
-    const index = Math.floor(corrected / SECTOR_SIZE);
-    return PRIZES[index];
+function getSegmentGradient(i) {
+  const grad = ctx.createLinearGradient(0, 0, 0, 400);
+  if (i % 2 === 0) {
+    grad.addColorStop(0, "#806248");
+    grad.addColorStop(1, "#563c2c");
+  } else {
+    grad.addColorStop(0, "#aebb82");
+    grad.addColorStop(1, "#d1e19c");
   }
+  return grad;
+}
 
-  function showWinPopup(text) {
-    winText.innerHTML = `🎉 Вы выиграли: <strong>${text}</strong>`;
-    popup.classList.add("visible");
-    setTimeout(() => popup.classList.remove("visible"), 3000);
+function chooseSegmentByRTP() {
+  const rnd = Math.random();
+  let sum = 0;
+  for (let p of prizes) {
+    sum += p.probability;
+    if (rnd <= sum) return p;
   }
+  return prizes[prizes.length - 1];
+}
 
-  spinBtn.addEventListener("click", async () => {
-    if (isSpinning) return;
-    let data;
-    try {
-      const resp = await fetch("/check_ip");
-      data = await resp.json();
-    } catch {
-      alert("Ошибка связи с сервером!");
-      return;
-    }
-
-    if (!data.can_spin) {
-      alert(data.message);
-      return;
-    }
-
-    isSpinning = true;
-    spinBtn.disabled = true;
-
-    const minTurns = 8;
-    const maxTurns = 12;
-    const fullTurns = Math.floor(Math.random() * (maxTurns - minTurns + 1)) + minTurns;
-    const extraDeg = Math.floor(Math.random() * 360);
-    const totalDeg = 360 * fullTurns + extraDeg;
-    deg += totalDeg;
-
-    wheel.style.transition = `transform 6s cubic-bezier(0.1,0.25,0.3,1)`;
-    wheel.style.transform = `rotate(${deg}deg)`;
-
-    setTimeout(async () => {
-      wheel.style.transition = "none";
-      deg %= 360;
-      wheel.style.transform = `rotate(${deg}deg)`;
-      const winningPrize = getWinningSector(deg);
-      showWinPopup(winningPrize.text);
-
-      setTimeout(async () => {
-        const username = prompt("Чтобы получить приз, введите ваш номер телефона:");
-        if (username) {
-          try {
-            await fetch("/send_prize", {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({ username: username, prize: winningPrize.text })
-            });
-          } catch (e) { console.error(e); }
-        }
-        try { await fetch("/register_spin", { method: "POST" }); } catch (e) { console.error(e); }
-        isSpinning = false;
-        spinBtn.disabled = true;
-      }, 3000);
-
-    }, 6000);
-  });
+const wheel = new Winwheel({
+  canvasId: 'wheelCanvas',
+  numSegments: prizes.length,
+  outerRadius: 205,
+  textFillStyle: '#fff',
+  textMargin: 25,
+  segments: prizes.map((p, i) => ({ fillStyle: getSegmentGradient(i), text: p.text })),
+  animation: { type: 'spinToStop', duration: 5, spins: 8, callbackFinished: onFinish }
 });
 
+spinBtn.onclick = async () => {
+  spinBtn.disabled = true;
+
+  try {
+    const res = await fetch('/check_ip');
+    const data = await res.json();
+    if (!data.allowed) {
+      alert("Вы уже крутили колесо.");
+      spinBtn.disabled = false;
+      return;
+    }
+  } catch (e) {
+    alert("Ошибка проверки IP.");
+    spinBtn.disabled = false;
+    return;
+  }
+
+  const winningPrize = chooseSegmentByRTP();
+  const segmentIndex = prizes.findIndex(p => p === winningPrize);
+  const segmentAngle = 360 / prizes.length;
+  const minAngle = segmentAngle * segmentIndex;
+  const maxAngle = segmentAngle * (segmentIndex + 1);
+  const stopAngle = Math.random() * (maxAngle - minAngle) + minAngle;
+
+  wheel.animation.stopAngle = stopAngle;
+  wheel.startAnimation();
+};
+
+function onFinish(segment) {
+
+  result.innerHTML = `
+    🎉 Вы выиграли: <strong>${segment.text}</strong><br><br>
+    Введите ваш телефон:<br>
+    <input type="text" id="phoneInput" placeholder="+7 (___) ___-__-__">
+    <button id="submitPhone">Отправить</button>
+  `;
+  result.classList.add('visible');
+
+  document.getElementById('submitPhone').onclick = async () => {
+    const phone = document.getElementById('phoneInput').value.trim();
+    if (!phone) return alert("Введите телефон!");
+
+    try {
+      const res = await fetch('/submit_prize', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, prize: segment.text })
+      });
+      const data = await res.json();
+      if (data.success) {
+        alert("Приз зафиксирован!");
+        result.classList.remove('visible');
+        spinBtn.disabled = false;
+      } else {
+        alert("Ошибка сохранения приза.");
+      }
+    } catch (e) {
+      alert("Ошибка отправки данных на сервер.");
+    }
+  };
+}
