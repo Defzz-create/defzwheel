@@ -1,6 +1,7 @@
+window.addEventListener("DOMContentLoaded", () => {
+  const spinBtn = document.getElementById('spinBtn');
 const canvas = document.getElementById('wheelCanvas');
 const ctx = canvas.getContext('2d');
-const spinBtn = document.getElementById('spinBtn');
 const result = document.getElementById('result');
 
 const prizes = [
@@ -50,19 +51,20 @@ const wheel = new Winwheel({
 spinBtn.onclick = async () => {
   spinBtn.disabled = true;
 
-  try {
-    const res = await fetch('/check_ip');
-    const data = await res.json();
-    if (!data.allowed) {
-      alert("Вы уже крутили колесо.");
-      spinBtn.disabled = false;
-      return;
-    }
-  } catch (e) {
-    alert("Ошибка проверки IP.");
-    spinBtn.disabled = false;
-    return;
-  }
+  fetch("/check_ip")
+    .then(r => r.json())
+    .then(data => {
+      console.log("Ответ от сервера:", data);
+      if (!data.can_spin) {
+        spinBtn.disabled = true;
+        spinBtn.textContent = "Вы уже крутили!";
+      } else {
+        spinBtn.disabled = false;
+        spinBtn.textContent = "Крутить";
+      }
+    })
+    .catch(err => console.error("Ошибка проверки IP:", err));
+});
 
   const winningPrize = chooseSegmentByRTP();
   const segmentIndex = prizes.findIndex(p => p === winningPrize);
@@ -108,3 +110,4 @@ function onFinish(segment) {
     }
   };
 }
+
