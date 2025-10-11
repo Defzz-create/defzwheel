@@ -4,6 +4,20 @@ window.addEventListener("DOMContentLoaded", () => {
   const ctx = canvas.getContext('2d');
   const result = document.getElementById('result');
 
+  function fixCanvasResolution() {
+    const ratio = window.devicePixelRatio || 1;
+    const width = 350;
+    const height = 350;
+    canvas.width = width * ratio;
+    canvas.height = height * ratio;
+    canvas.style.width = width + "px";
+    canvas.style.height = height + "px";
+    ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+  }
+
+  fixCanvasResolution();
+  window.addEventListener('resize', fixCanvasResolution);
+
   const prizes = [
     { text: "Скидка - 5%\nна маникюр", probability: 0.2 },
     { text: "Скидка - 10%\nна маникюр", probability: 0.1 },
@@ -37,15 +51,23 @@ window.addEventListener("DOMContentLoaded", () => {
     return prizes[prizes.length - 1];
   }
 
-  const wheel = new Winwheel({
+  let wheel = new Winwheel({
     canvasId: 'wheelCanvas',
     numSegments: prizes.length,
     outerRadius: 177,
     textFontSize: 18,
     textFillStyle: '#fff',
     textMargin: 18,
-    segments: prizes.map((p, i) => ({ fillStyle: getSegmentGradient(i), text: p.text })),
-    animation: { type: 'spinToStop', duration: 5, spins: 8, callbackFinished: onFinish }
+    segments: prizes.map((p, i) => ({
+      fillStyle: getSegmentGradient(i),
+      text: p.text
+    })),
+    animation: {
+      type: 'spinToStop',
+      duration: 5,
+      spins: 8,
+      callbackFinished: onFinish
+    }
   });
 
   spinBtn.onclick = async () => {
@@ -55,7 +77,6 @@ window.addEventListener("DOMContentLoaded", () => {
       const check = await fetch("/check_ip").then(r => r.json());
       if (!check.can_spin) {
         alert(check.message || "Вы уже крутили колесо!");
-        spinBtn.disabled = true;
         return;
       }
 
@@ -68,7 +89,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
       wheel.animation.stopAngle = stopAngle;
       wheel.startAnimation();
-      
+
       await fetch("/register_spin", { method: "POST" });
 
     } catch (err) {
@@ -97,6 +118,7 @@ window.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify({ phone, prize: segment.text })
         });
         const data = await res.json();
+
         if (data.success) {
           alert("Приз зафиксирован!");
           result.classList.remove('visible');
@@ -104,7 +126,7 @@ window.addEventListener("DOMContentLoaded", () => {
         } else {
           alert("Ошибка сохранения приза.");
         }
-      } catch (e) {
+      } catch {
         alert("Ошибка отправки данных на сервер.");
       }
     };
