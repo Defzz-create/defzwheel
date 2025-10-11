@@ -1,19 +1,23 @@
 window.addEventListener("DOMContentLoaded", () => {
   const spinBtn = document.getElementById("spinBtn");
   const canvas = document.getElementById("wheelCanvas");
-  const ctx = canvas.getContext("2d");
   const result = document.getElementById("result");
 
-  const baseSize = 350;
-  function setHiDPI() {
+  function setupCanvas() {
+    const ctx = canvas.getContext("2d");
     const ratio = window.devicePixelRatio || 1;
-    canvas.width = baseSize * ratio;
-    canvas.height = baseSize * ratio;
-    canvas.style.width = baseSize + "px";
-    canvas.style.height = baseSize + "px";
+    const size = 350;
+
+    canvas.style.width = size + "px";
+    canvas.style.height = size + "px";
+    canvas.width = size * ratio;
+    canvas.height = size * ratio;
+
     ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    return ctx;
   }
-  setHiDPI();
+
+  const ctx = setupCanvas();
 
   const prizes = [
     { text: "Скидка - 5%\nна маникюр", probability: 0.2 },
@@ -27,7 +31,7 @@ window.addEventListener("DOMContentLoaded", () => {
   ];
 
   function getSegmentGradient(i) {
-    const grad = ctx.createLinearGradient(0, 0, 0, baseSize);
+    const grad = ctx.createLinearGradient(0, 0, 0, 350);
     if (i % 2 === 0) {
       grad.addColorStop(0, "#806248");
       grad.addColorStop(1, "#563c2c");
@@ -48,24 +52,29 @@ window.addEventListener("DOMContentLoaded", () => {
     return prizes[prizes.length - 1];
   }
 
-  const wheel = new Winwheel({
-    canvasId: "wheelCanvas",
-    numSegments: prizes.length,
-    outerRadius: 177,
-    textFontSize: 18,
-    textFillStyle: "#fff",
-    textMargin: 18,
-    segments: prizes.map((p, i) => ({
-      fillStyle: getSegmentGradient(i),
-      text: p.text,
-    })),
-    animation: {
-      type: "spinToStop",
-      duration: 5,
-      spins: 8,
-      callbackFinished: onFinish,
-    },
-  });
+  let wheel = null;
+  function createWheel() {
+    wheel = new Winwheel({
+      canvasId: "wheelCanvas",
+      numSegments: prizes.length,
+      outerRadius: 177,
+      textFontSize: 18,
+      textFillStyle: "#fff",
+      textMargin: 18,
+      segments: prizes.map((p, i) => ({
+        fillStyle: getSegmentGradient(i),
+        text: p.text,
+      })),
+      animation: {
+        type: "spinToStop",
+        duration: 5,
+        spins: 8,
+        callbackFinished: onFinish,
+      },
+    });
+  }
+
+  createWheel();
 
   spinBtn.onclick = async () => {
     spinBtn.disabled = true;
@@ -73,16 +82,20 @@ window.addEventListener("DOMContentLoaded", () => {
       const check = await fetch("/check_ip").then((r) => r.json());
       if (!check.can_spin) {
         alert(check.message || "Вы уже крутили колесо!");
+        spinBtn.disabled = false;
         return;
       }
+
       const winningPrize = chooseSegmentByRTP();
       const segmentIndex = prizes.findIndex((p) => p === winningPrize);
       const segmentAngle = 360 / prizes.length;
       const minAngle = segmentAngle * segmentIndex;
       const maxAngle = segmentAngle * (segmentIndex + 1);
       const stopAngle = Math.random() * (maxAngle - minAngle) + minAngle;
+
       wheel.animation.stopAngle = stopAngle;
       wheel.startAnimation();
+
       await fetch("/register_spin", { method: "POST" });
     } catch (err) {
       console.error("Ошибка проверки или регистрации спина:", err);
@@ -98,9 +111,11 @@ window.addEventListener("DOMContentLoaded", () => {
       <button id="submitPhone">Отправить</button>
     `;
     result.classList.add("visible");
+
     document.getElementById("submitPhone").onclick = async () => {
       const phone = document.getElementById("phoneInput").value.trim();
       if (!phone) return alert("Введите телефон!");
+
       try {
         const res = await fetch("/submit_prize", {
           method: "POST",
@@ -120,4 +135,14 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     };
   }
+
+  window.addEventListener("resize", () => {
+    const oldAngle = wheel.rotationAngle;
+    const oldSegments = wheel.segments;
+    const oldPrizes = wheel.numSegments;
+    setupCanvas();
+    createWheel();
+    wheel.rotationAngle = oldAngle;
+    wheel.draw();
+  });
 });
