@@ -73,6 +73,12 @@ def index():
 def static_files(path):
     return send_from_directory("wheel", path)
 
+@app.route("/debug_spins")
+def debug_spins():
+    data = load_spins()
+    return jsonify(data)
+
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
