@@ -12,7 +12,7 @@ window.addEventListener("DOMContentLoaded", () => {
     { text: "Скидка - 5%\nна брови", probability: 0.2 },
     { text: "Скидка - 10%\nна брови", probability: 0.1 },
     { text: "Бесплатные\nброви", probability: 0.05 },
-    { text: "Бесплатная\nмаска для лица", probability: 0.05 }
+    { text: "Бесплатная\nмаска\nдля лица", probability: 0.05 }
   ];
 
   function getSegmentGradient(i) {
@@ -42,7 +42,8 @@ window.addEventListener("DOMContentLoaded", () => {
     numSegments: prizes.length,
     outerRadius: 177,
     textFillStyle: "#fff",
-    textMargin: 18,
+    textFontSize: 16,
+    textMargin: 20,
     segments: prizes.map((p, i) => ({
       fillStyle: getSegmentGradient(i),
       text: p.text
