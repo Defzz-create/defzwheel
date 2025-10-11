@@ -1,25 +1,37 @@
 from flask import Flask, request, jsonify, send_from_directory
 from datetime import datetime, timedelta
-import os, json, requests
+import os, json
+import requests
 
 app = Flask(__name__)
 
-spins_file = "spins.json"
+json_id = os.getenv("json_id")
+api_key = os.getenv("api_key")
 token = os.getenv("tg_bot_token")
 tg_id = os.getenv("tg_id")
 
 def load_spins():
-    if not os.path.exists(spins_file):
-        return {}
+    url = f"https://api.jsonbin.io/v3/b/{json_id}/latest"
+    headers = {"X-Master-Key": api_key}
     try:
-        with open(spins_file, "r", encoding="utf-8") as f:
-            return json.load(f)
-    except:
+        r = requests.get(url, headers=headers)
+        r.raise_for_status()
+        data = r.json().get("record", {})
+        return data
+    except Exception as e:
+        print("Ошибка загрузки spins:", e)
         return {}
 
 def save_spins(data):
-    with open(spins_file, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=2)
+    url = f"https://api.jsonbin.io/v3/b/{json_id}"
+    headers = {
+        "X-Master-Key": api_key,
+        "Content-Type": "application/json"
+    }
+    try:
+        requests.put(url, headers=headers, json=data)
+    except Exception as e:
+        print("Ошибка сохранения spins:", e)
 
 def get_real_ip():
     ip = request.headers.get("X-Forwarded-For", request.remote_addr)
@@ -43,12 +55,10 @@ def check_ip():
     ip = get_real_ip()
     spins = load_spins()
     now = datetime.now()
-
     if ip in spins:
         last_spin = datetime.fromisoformat(spins[ip])
         if now - last_spin < timedelta(days=30):
-            return jsonify({"can_spin": False})
-
+            return jsonify({"can_spin": False, "message": "Вы уже крутили барабан! Повторная попытка через месяц."})
     return jsonify({"can_spin": True})
 
 @app.route("/register_spin", methods=["POST"])
@@ -78,7 +88,6 @@ def static_files(path):
 @app.route("/debug_spins")
 def debug_spins():
     return jsonify(load_spins())
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
