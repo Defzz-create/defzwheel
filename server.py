@@ -60,10 +60,10 @@ def register_spin():
 @app.route("/send_prize", methods=["POST"])
 def send_prize():
     data = request.json
-    username = data.get("username", "Неизвестный пользователь")
+    phone = data.get("phone", "Не указан")
     prize = data.get("prize", "Без приза")
-    send_telegram_message(username, prize)
-    return jsonify({"status": "ok"})
+    send_telegram_message(phone, prize)
+    return jsonify({"success": True})
 
 @app.route("/")
 def index():
@@ -81,4 +81,5 @@ def debug_spins():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=10000)
+
 
