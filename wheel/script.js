@@ -1,5 +1,4 @@
-window.addEventListener("DOMContentLoaded", () => {
-  const spinBtn = document.getElementById('spinBtn');
+const spinBtn = document.getElementById('spinBtn');
 const canvas = document.getElementById('wheelCanvas');
 const ctx = canvas.getContext('2d');
 const result = document.getElementById('result');
@@ -51,6 +50,8 @@ const wheel = new Winwheel({
 spinBtn.onclick = async () => {
   spinBtn.disabled = true;
 
+  window.addEventListener("DOMContentLoaded", () => {
+  const spinBtn = document.getElementById('spinBtn');
   fetch("/check_ip")
     .then(r => r.json())
     .then(data => {
@@ -110,4 +111,5 @@ function onFinish(segment) {
     }
   };
 }
+
 
