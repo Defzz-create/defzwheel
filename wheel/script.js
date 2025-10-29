@@ -5,15 +5,16 @@ window.addEventListener("DOMContentLoaded", () => {
   const result = document.getElementById('result');
 
   const prizes = [
-    { text: "Скидка - 5%\nна маникюр", probability: 0.2 },
-    { text: "Скидка - 10%\nна маникюр", probability: 0.1 },
-    { text: "Скидка - 5%\nна педикюр", probability: 0.2 },
-    { text: "Скидка - 10%\nна педикюр", probability: 0.1 },
-    { text: "Скидка - 5%\nна брови", probability: 0.2 },
-    { text: "Скидка - 10%\nна брови", probability: 0.1 },
-    { text: "Бесплатные\nброви", probability: 0.05 },
-    { text: "Бесплатная\nмаска для лица", probability: 0.05 }
+    { text: "Депозит\n5.000 рублей", probability: 0 },
+    { text: "Скидка\nна маникюр\n10%", probability: 0.2 },
+    { text: "Скидка\nна брови\n20%", probability: 0.2 },
+    { text: "Масло для\nкутикул\nв подарок", probability: 0.2 },
+    { text: "Маска для лица\nв подарок", probability: 0.2 },
+    { text: "SPA уход для\nрук в подарок", probability: 0.2 },
   ];
+
+  const totalProbability = prizes.reduce((acc, p) => acc + p.probability, 0);
+  prizes.forEach(p => p.normalized = p.probability / totalProbability);
 
   function getSegmentGradient(i) {
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -31,7 +32,7 @@ window.addEventListener("DOMContentLoaded", () => {
     const rnd = Math.random();
     let sum = 0;
     for (let p of prizes) {
-      sum += p.probability;
+      sum += p.normalized;
       if (rnd <= sum) return p;
     }
     return prizes[prizes.length - 1];
@@ -43,14 +44,13 @@ window.addEventListener("DOMContentLoaded", () => {
     outerRadius: 177,
     textFontSize: 18,
     textFillStyle: '#fff',
-    textMargin: 18,
+    textMargin: 16,
     segments: prizes.map((p, i) => ({ fillStyle: getSegmentGradient(i), text: p.text })),
     animation: { type: 'spinToStop', duration: 5, spins: 8, callbackFinished: onFinish }
   });
 
   spinBtn.onclick = async () => {
     spinBtn.disabled = true;
-
     try {
       const check = await fetch("/check_ip").then(r => r.json());
       if (!check.can_spin) {
@@ -64,13 +64,12 @@ window.addEventListener("DOMContentLoaded", () => {
       const segmentAngle = 360 / prizes.length;
       const minAngle = segmentAngle * segmentIndex;
       const maxAngle = segmentAngle * (segmentIndex + 1);
-      const stopAngle = Math.random() * (maxAngle - minAngle) + minAngle;
+      const stopAngle = Math.random() * (maxAngle - minAngle) + minAngle + segmentAngle / 2;
 
       wheel.animation.stopAngle = stopAngle;
       wheel.startAnimation();
       
       await fetch("/register_spin", { method: "POST" });
-
     } catch (err) {
       console.error("Ошибка проверки или регистрации спина:", err);
       spinBtn.disabled = false;
@@ -89,7 +88,6 @@ window.addEventListener("DOMContentLoaded", () => {
     document.getElementById('submitPhone').onclick = async () => {
       const phone = document.getElementById('phoneInput').value.trim();
       if (!phone) return alert("Введите телефон!");
-
       try {
         const res = await fetch('/submit_prize', {
           method: 'POST',
