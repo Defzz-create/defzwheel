@@ -108,22 +108,4 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     };
   }
-
-  const rtpBtn = document.createElement('button');
-  rtpBtn.textContent = "Проверить RTP (10000 спинов)";
-  rtpBtn.style.marginTop = "10px";
-  document.body.appendChild(rtpBtn);
-
-  rtpBtn.onclick = () => {
-    const counts = {};
-    activePrizes.forEach(p => counts[p.text] = 0);
-    for (let i = 0; i < 10000; i++) {
-      const prize = chooseSegmentByRTP();
-      counts[prize.text]++;
-    }
-    const total = 10000;
-    const resultText = Object.entries(counts).map(([k,v]) => `${k}: ${(v/total*100).toFixed(2)}%`).join("\n");
-    alert("RTP протестирован:\n\n" + resultText);
-    console.table(counts);
-  };
 });
