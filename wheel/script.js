@@ -13,8 +13,9 @@ window.addEventListener("DOMContentLoaded", () => {
     { text: "SPA уход для\nрук в подарок", probability: 0.2 },
   ];
 
-  const totalProbability = prizes.reduce((acc, p) => acc + p.probability, 0);
-  prizes.forEach(p => p.normalized = p.probability / totalProbability);
+  const activePrizes = prizes.filter(p => p.probability > 0);
+  const totalProbability = activePrizes.reduce((acc, p) => acc + p.probability, 0);
+  activePrizes.forEach(p => p.normalized = p.probability / totalProbability);
 
   function getSegmentGradient(i) {
     const grad = ctx.createLinearGradient(0, 0, 0, canvas.height);
@@ -31,11 +32,11 @@ window.addEventListener("DOMContentLoaded", () => {
   function chooseSegmentByRTP() {
     const rnd = Math.random();
     let sum = 0;
-    for (let p of prizes) {
+    for (let p of activePrizes) {
       sum += p.normalized;
       if (rnd <= sum) return p;
     }
-    return prizes[prizes.length - 1];
+    return activePrizes[activePrizes.length - 1];
   }
 
   const wheel = new Winwheel({
@@ -60,7 +61,7 @@ window.addEventListener("DOMContentLoaded", () => {
       }
 
       const winningPrize = chooseSegmentByRTP();
-      const segmentIndex = prizes.findIndex(p => p === winningPrize);
+      const segmentIndex = prizes.findIndex(p => p.text === winningPrize.text);
       const segmentAngle = 360 / prizes.length;
       const minAngle = segmentAngle * segmentIndex;
       const maxAngle = segmentAngle * (segmentIndex + 1);
@@ -68,7 +69,7 @@ window.addEventListener("DOMContentLoaded", () => {
 
       wheel.animation.stopAngle = stopAngle;
       wheel.startAnimation();
-      
+
       await fetch("/register_spin", { method: "POST" });
     } catch (err) {
       console.error("Ошибка проверки или регистрации спина:", err);
@@ -107,4 +108,22 @@ window.addEventListener("DOMContentLoaded", () => {
       }
     };
   }
+
+  const rtpBtn = document.createElement('button');
+  rtpBtn.textContent = "Проверить RTP (10000 спинов)";
+  rtpBtn.style.marginTop = "10px";
+  document.body.appendChild(rtpBtn);
+
+  rtpBtn.onclick = () => {
+    const counts = {};
+    activePrizes.forEach(p => counts[p.text] = 0);
+    for (let i = 0; i < 10000; i++) {
+      const prize = chooseSegmentByRTP();
+      counts[prize.text]++;
+    }
+    const total = 10000;
+    const resultText = Object.entries(counts).map(([k,v]) => `${k}: ${(v/total*100).toFixed(2)}%`).join("\n");
+    alert("RTP протестирован:\n\n" + resultText);
+    console.table(counts);
+  };
 });
