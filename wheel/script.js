@@ -10,23 +10,15 @@ window.addEventListener("DOMContentLoaded", () => {
     { text: "Скидка\nна брови\n20%", probability: 0.2 },
     { text: "Масло для\nкутикул\nв подарок", probability: 0.2 },
     { text: "Маска для лица\nв подарок", probability: 0.2 },
-    { text: "SPA уход для\nрук в подарок", probability: 0.2 },
+    { text: "SPA уход для\nрук в подарок", probability: 0.2 }
   ];
 
   const activePrizes = prizes.filter(p => p.probability > 0);
-
   if (activePrizes.length === 0) {
-    console.error("Нет активных призов. Установите хотя бы одну положительную вероятность.");
     spinBtn.disabled = true;
     return;
   }
-
   const totalProbability = activePrizes.reduce((acc, p) => acc + p.probability, 0);
-  if (totalProbability <= 0) {
-    console.error("Сумма вероятностей активных призов равна нулю.");
-    spinBtn.disabled = true;
-    return;
-  }
   activePrizes.forEach(p => p.normalized = p.probability / totalProbability);
 
   function getSegmentGradient(i) {
@@ -41,7 +33,7 @@ window.addEventListener("DOMContentLoaded", () => {
     return grad;
   }
 
-  function chooseSegmentIndexByRTP() {
+  function chooseActiveIndexByRTP() {
     const rnd = Math.random();
     let sum = 0;
     for (let i = 0; i < activePrizes.length; i++) {
@@ -51,55 +43,57 @@ window.addEventListener("DOMContentLoaded", () => {
     return activePrizes.length - 1;
   }
 
+  const outerRadius = Math.floor(canvas.width / 2) - 8;
   const wheel = new Winwheel({
     canvasId: 'wheelCanvas',
-    numSegments: activePrizes.length,
-    outerRadius: 177,
+    numSegments: prizes.length,
+    outerRadius: outerRadius,
     textFontSize: 18,
     textFillStyle: '#fff',
     textMargin: 16,
-    segments: activePrizes.map((p, i) => ({ fillStyle: getSegmentGradient(i), text: p.text })),
+    segments: prizes.map((p, i) => ({ fillStyle: getSegmentGradient(i), text: p.text })),
     animation: { type: 'spinToStop', duration: 5, spins: 8, callbackFinished: onFinish }
   });
 
-  spinBtn.onclick = async () => {
+  spinBtn.addEventListener('click', async () => {
     spinBtn.disabled = true;
     try {
-      const check = await fetch("/check_ip").then(r => r.json());
+      const checkRes = await fetch('/check_ip');
+      const check = await checkRes.json();
       if (!check.can_spin) {
-        alert(check.message || "Вы уже крутили колесо!");
+        alert(check.message || 'Вы уже крутили колесо!');
         spinBtn.disabled = false;
         return;
       }
-
-      const chosenIndex = chooseSegmentIndexByRTP();
-      const segmentAngle = 360 / activePrizes.length;
-      const minAngle = segmentAngle * chosenIndex;
-      const maxAngle = segmentAngle * (chosenIndex + 1);
-      const stopAngle = Math.random() * (maxAngle - minAngle) + minAngle + segmentAngle / 2;
-
+      const chosenActiveIndex = chooseActiveIndexByRTP();
+      const chosenPrize = activePrizes[chosenActiveIndex];
+      const fullIndex = prizes.findIndex(p => p.text === chosenPrize.text);
+      if (fullIndex === -1) {
+        spinBtn.disabled = false;
+        return;
+      }
+      const segmentAngle = 360 / prizes.length;
+      const minAngle = segmentAngle * fullIndex;
+      const stopAngle = minAngle + Math.random() * segmentAngle;
       wheel.animation.stopAngle = stopAngle;
       wheel.startAnimation();
-
-      await fetch("/register_spin", { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prize: activePrizes[chosenIndex].text }) });
-    } catch (err) {
-      console.error("Ошибка проверки или регистрации спина:", err);
+      await fetch('/register_spin', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prize: chosenPrize.text })
+      });
+    } catch (e) {
+      console.error(e);
       spinBtn.disabled = false;
     }
-  };
+  });
 
   function onFinish(segment) {
-    result.innerHTML = `
-      🎉 Вы выиграли: <strong>${segment.text}</strong><br><br>
-      Введите ваш телефон:<br>
-      <input type="text" id="phoneInput" placeholder="+7 (___) ___-__-__">
-      <button id="submitPhone">Отправить</button>
-    `;
+    result.innerHTML = `🎉 Вы выиграли: <strong>${segment.text}</strong><br><br>Введите ваш телефон:<br><input type="tel" id="phoneInput" placeholder="+7 (___) ___-__-__"><button id="submitPhone">Отправить</button>`;
     result.classList.add('visible');
-
     document.getElementById('submitPhone').onclick = async () => {
       const phone = document.getElementById('phoneInput').value.trim();
-      if (!phone) return alert("Введите телефон!");
+      if (!phone) return alert('Введите телефон!');
       try {
         const res = await fetch('/submit_prize', {
           method: 'POST',
@@ -108,18 +102,18 @@ window.addEventListener("DOMContentLoaded", () => {
         });
         const data = await res.json();
         if (data.success) {
-          alert("Приз зафиксирован!");
+          alert('Приз зафиксирован!');
           result.classList.remove('visible');
           spinBtn.disabled = false;
         } else {
-          alert("Ошибка сохранения приза.");
+          alert('Ошибка сохранения приза.');
           spinBtn.disabled = false;
         }
       } catch (e) {
-        alert("Ошибка отправки данных на сервер.");
+        alert('Ошибка отправки данных на сервер.');
         spinBtn.disabled = false;
       }
- 
     };
+
   }
 });
