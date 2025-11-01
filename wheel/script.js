@@ -14,7 +14,19 @@ window.addEventListener("DOMContentLoaded", () => {
   ];
 
   const activePrizes = prizes.filter(p => p.probability > 0);
+
+  if (activePrizes.length === 0) {
+    console.error("Нет активных призов. Установите хотя бы одну положительную вероятность.");
+    spinBtn.disabled = true;
+    return;
+  }
+
   const totalProbability = activePrizes.reduce((acc, p) => acc + p.probability, 0);
+  if (totalProbability <= 0) {
+    console.error("Сумма вероятностей активных призов равна нулю.");
+    spinBtn.disabled = true;
+    return;
+  }
   activePrizes.forEach(p => p.normalized = p.probability / totalProbability);
 
   function getSegmentGradient(i) {
@@ -29,24 +41,24 @@ window.addEventListener("DOMContentLoaded", () => {
     return grad;
   }
 
-  function chooseSegmentByRTP() {
+  function chooseSegmentIndexByRTP() {
     const rnd = Math.random();
     let sum = 0;
-    for (let p of activePrizes) {
-      sum += p.normalized;
-      if (rnd <= sum) return p;
+    for (let i = 0; i < activePrizes.length; i++) {
+      sum += activePrizes[i].normalized;
+      if (rnd <= sum) return i;
     }
-    return activePrizes[activePrizes.length - 1];
+    return activePrizes.length - 1;
   }
 
   const wheel = new Winwheel({
     canvasId: 'wheelCanvas',
-    numSegments: prizes.length,
+    numSegments: activePrizes.length,
     outerRadius: 177,
     textFontSize: 18,
     textFillStyle: '#fff',
     textMargin: 16,
-    segments: prizes.map((p, i) => ({ fillStyle: getSegmentGradient(i), text: p.text })),
+    segments: activePrizes.map((p, i) => ({ fillStyle: getSegmentGradient(i), text: p.text })),
     animation: { type: 'spinToStop', duration: 5, spins: 8, callbackFinished: onFinish }
   });
 
@@ -56,21 +68,20 @@ window.addEventListener("DOMContentLoaded", () => {
       const check = await fetch("/check_ip").then(r => r.json());
       if (!check.can_spin) {
         alert(check.message || "Вы уже крутили колесо!");
-        spinBtn.disabled = true;
+        spinBtn.disabled = false;
         return;
       }
 
-      const winningPrize = chooseSegmentByRTP();
-      const segmentIndex = prizes.findIndex(p => p.text === winningPrize.text);
-      const segmentAngle = 360 / prizes.length;
-      const minAngle = segmentAngle * segmentIndex;
-      const maxAngle = segmentAngle * (segmentIndex + 1);
+      const chosenIndex = chooseSegmentIndexByRTP();
+      const segmentAngle = 360 / activePrizes.length;
+      const minAngle = segmentAngle * chosenIndex;
+      const maxAngle = segmentAngle * (chosenIndex + 1);
       const stopAngle = Math.random() * (maxAngle - minAngle) + minAngle + segmentAngle / 2;
 
       wheel.animation.stopAngle = stopAngle;
       wheel.startAnimation();
 
-      await fetch("/register_spin", { method: "POST" });
+      await fetch("/register_spin", { method: "POST", headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ prize: activePrizes[chosenIndex].text }) });
     } catch (err) {
       console.error("Ошибка проверки или регистрации спина:", err);
       spinBtn.disabled = false;
@@ -102,10 +113,13 @@ window.addEventListener("DOMContentLoaded", () => {
           spinBtn.disabled = false;
         } else {
           alert("Ошибка сохранения приза.");
+          spinBtn.disabled = false;
         }
       } catch (e) {
         alert("Ошибка отправки данных на сервер.");
+        spinBtn.disabled = false;
       }
+ 
     };
   }
 });
