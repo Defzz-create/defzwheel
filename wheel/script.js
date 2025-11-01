@@ -42,12 +42,11 @@ window.addEventListener("DOMContentLoaded", () => {
     }
     return activePrizes.length - 1;
   }
-
-  const outerRadius = Math.floor(canvas.width / 2) - 8;
+  
   const wheel = new Winwheel({
     canvasId: 'wheelCanvas',
     numSegments: prizes.length,
-    outerRadius: outerRadius,
+    outerRadius: 176,
     textFontSize: 18,
     textFillStyle: '#fff',
     textMargin: 16,
@@ -117,3 +116,4 @@ window.addEventListener("DOMContentLoaded", () => {
 
   }
 });
+
